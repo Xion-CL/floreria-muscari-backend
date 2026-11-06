@@ -1,0 +1,127 @@
+===============================================================================
+ INSTRUCCIONES: LEVANTAR, ALOJAR Y PROBAR  -  La Cabaña de Muscari (Backend)
+===============================================================================
+
+IMPORTANTE ANTES DE EMPEZAR
+---------------------------
+* Tu antiguo settings.py tenía la contraseña de Supabase escrita en el código
+  (y también estaba en Supabase.txt, credenciales.txt y test_db.py). Ese ZIP ya
+  no la contiene, pero si alguna vez subiste esos archivos a GitHub, CAMBIA la
+  contraseña de la base: Supabase > Project Settings > Database > Reset password.
+* GitHub Pages solo aloja páginas estáticas (HTML/JS). Django necesita un
+  servidor, por eso el backend se aloja en RENDER (gratis) y la base en SUPABASE
+  (gratis). Si tu frontend React sigue en GitHub Pages, consume la API de Render
+  (ver paso 7).
+
+-------------------------------------------------------------------------------
+ 1) PROBAR EN TU COMPUTADOR
+-------------------------------------------------------------------------------
+   python -m venv venv
+   venv\Scripts\activate                 (Linux/Mac: source venv/bin/activate)
+   pip install -r requirements.txt
+   copy .env.example .env                (Linux/Mac: cp .env.example .env)
+   -> abre .env y completa DATABASE_URL con tu URL de Supabase (ver paso 2).
+      Si lo dejas vacío usa SQLite local y funciona igual.
+   python manage.py migrate
+   python manage.py seed_demo
+   python manage.py runserver
+   Abre http://127.0.0.1:8000
+
+   Usuario demo: demo / Muscari2026!
+   Admin: python manage.py createsuperuser   (entras en /admin/)
+
+-------------------------------------------------------------------------------
+ 2) SUPABASE (base de datos en la nube)
+-------------------------------------------------------------------------------
+ a. Supabase > tu proyecto > botón "Connect" > "Session pooler".
+ b. Copia la URL:  postgresql://postgres.XXXX:[TU-CLAVE]@aws-0-...pooler.supabase.com:5432/postgres
+ c. Reemplaza [TU-CLAVE] por tu contraseña. Si tiene caracteres especiales,
+    codifícalos: @ -> %40   # -> %23   / -> %2F   : -> %3A   % -> %25
+ d. Usa el "Session pooler" (puerto 5432): la conexión directa de Supabase usa
+    IPv6 y Render gratis no la soporta.
+ e. Las tablas existentes se conservan: la migración nueva (0003) solo agrega
+    el campo imagen_url y permite slug/imagen vacíos.
+
+-------------------------------------------------------------------------------
+ 3) SUBIR EL PROYECTO A GITHUB
+-------------------------------------------------------------------------------
+   git init
+   git add .
+   git commit -m "Backend La Cabaña de Muscari"
+   git branch -M main
+   git remote add origin https://github.com/Xion-CL/floreria-muscari-backend.git
+   git push -u origin main
+ Verifica en GitHub que NO aparezcan .env, venv/ ni db.sqlite3 (el .gitignore
+ ya los excluye) y que SÍ esté media/productos/ (fotos del catálogo).
+
+-------------------------------------------------------------------------------
+ 4) DESPLEGAR EN RENDER (gratis)
+-------------------------------------------------------------------------------
+ a. https://render.com > crear cuenta con GitHub.
+ b. New + > Blueprint > elige tu repositorio (detecta render.yaml)
+    (alternativa manual: New + > Web Service; Build Command: bash build.sh ;
+     Start Command: gunicorn config.wsgi:application ; Plan Free).
+ c. Cuando pida variables secretas:
+      DATABASE_URL   = la URL del paso 2
+      ADMIN_PASSWORD = una clave segura para el superusuario "admin_completo"
+    (SECRET_KEY se genera sola; DEBUG ya queda en False.)
+ d. Espera el build (3-5 min). Tu URL será https://floreria-muscari.onrender.com
+ e. Comprueba: / (inicio), /catalogo/, /login/, /reportes/ (tras iniciar sesión).
+ f. Plan gratis: el servicio "duerme" tras 15 min sin visitas y tarda ~50 s en
+    despertar. ABRE LA URL 2 MINUTOS ANTES DE PRESENTAR.
+ g. Las fotos subidas desde el panel se guardan en disco temporal de Render y se
+    pierden al reiniciar; para productos nuevos usa el campo "URL de imagen"
+    (enlace público). Las fotos del catálogo inicial están en el repositorio y
+    no se pierden.
+
+-------------------------------------------------------------------------------
+ 5) ACCESO AL PANEL
+-------------------------------------------------------------------------------
+ * Por defecto (PANEL_SOLO_STAFF=False) cualquier usuario registrado puede usar
+   el panel de gestión: así puedes mostrar Registro -> Login -> CRUD en la demo.
+ * Después de la evaluación, en Render > Environment pon PANEL_SOLO_STAFF=True:
+   solo usuarios "staff" (admin_completo) podrán gestionar.
+ * Menú "Gestión" (aparece al iniciar sesión): Productos, Categorías, Pedidos,
+   Inventario, Movimientos, Dashboard de reportes, Costos del proyecto.
+
+-------------------------------------------------------------------------------
+ 6) ACTUALIZAR EL SITIO
+-------------------------------------------------------------------------------
+   git add . && git commit -m "cambios" && git push
+ Render redepliega solo (autoDeploy). Las migraciones se aplican en el build.
+
+-------------------------------------------------------------------------------
+ 7) FRONTEND EN GITHUB PAGES (opcional)
+-------------------------------------------------------------------------------
+ * La API pública está en https://TU-APP.onrender.com/api/ :
+     /api/productos/?categoria=ramos&ocasion=cumpleanos&q=rosa
+     /api/productos-destacados/   /api/categorias/   /api/ocasiones/
+ * En Render > Environment: CORS_ALLOWED_ORIGINS = https://TU-USUARIO.github.io
+ * Token JWT: POST /api/token/ con username y password.
+
+-------------------------------------------------------------------------------
+ 8) PROBLEMAS FRECUENTES
+-------------------------------------------------------------------------------
+ * "Network is unreachable" / timeout hacia Supabase  -> usa la URL del Session pooler.
+ * "password authentication failed"                   -> clave mal copiada o sin codificar.
+ * Error 400 "DisallowedHost"                         -> agrega tu dominio en ALLOWED_HOSTS (Render lo hace solo).
+ * Error 403 CSRF al iniciar sesión en tu dominio     -> CSRF_TRUSTED_ORIGINS=https://tu-dominio
+ * Estilos sin cargar en producción                   -> el build debe ejecutar collectstatic (ya está en build.sh).
+ * Menú/hamburguesa: ahora usa static/js/navbar.js; refresca con Ctrl+F5 si ves la versión anterior.
+ * Pruebas: python manage.py test  (24 pruebas).
+
+-------------------------------------------------------------------------------
+ 9) CAMBIOS RESPECTO A TU AVANCE
+-------------------------------------------------------------------------------
+ * Navbar y hamburguesa reescritos (PC: dropdown con mouse/teclado; móvil: menú
+   y acordeón). Corrige: dropdown cortado por overflow, menú móvil mal ubicado
+   y submenús que quedaban abiertos.
+ * Footer y menú ahora se generan desde la base de datos y enlazan a
+   /catalogo/categoria/<slug>/ y /catalogo/ocasion/<slug>/ (productos filtrados).
+ * Carrito: ahora usa data-attributes (antes concatenaba precio original y de
+   oferta) y un único localStorage compartido.
+ * Nuevo: login/registro/logout reales, CRUD, inventario, pedidos, reportes,
+   costos, seed_demo, pruebas, despliegue.
+ * Eliminados del ZIP por seguridad: .env, Supabase.txt, credenciales.txt,
+   test_db.py, test_supabase.py, crear_usuarios.py (traía claves escritas),
+   asignar/actualizar_imagenes.py, cargar_*.py (reemplazados por seed_demo).

@@ -1,0 +1,28 @@
+{% load static %}
+<div class="product-card" data-product-id="{{ p.id }}" data-name="{{ p.nombre }}" data-price="{{ p.precio_final|stringformat:'d' }}" data-image="{{ p.imagen_src }}">
+    <div class="product-img">
+        <a href="{% url 'catalogo:detalle' p.slug %}" aria-label="Ver {{ p.nombre }}">
+            {% if p.imagen_src %}<img src="{{ p.imagen_src }}" alt="{{ p.nombre }}" loading="lazy">{% else %}<div class="ph">{{ p.categoria.icono|default:"🌸" }}</div>{% endif %}
+        </a>
+        {% if p.badge != 'NINGUNO' %}<span class="product-tag">{{ p.get_badge_display }}</span>{% endif %}
+    </div>
+    <div class="product-info">
+        <h3><a href="{% url 'catalogo:detalle' p.slug %}">{{ p.nombre }}</a></h3>
+        <p class="product-description">{{ p.descripcion_corta|default:p.descripcion|truncatechars:90 }}</p>
+        <div class="product-rating">
+            <span class="stars">{% for i in "12345" %}<i class="{% if p.promedio_resenas >= forloop.counter %}fas{% else %}far{% endif %} fa-star"></i>{% endfor %}</span>
+            <span class="rating-text">({{ p.resenas_count }} reseña{{ p.resenas_count|pluralize }})</span>
+        </div>
+        <div class="product-price-row">
+            <div class="product-price">
+                {% if p.tiene_descuento %}<span class="old-price">${{ p.precio_original|floatformat:"0g" }}</span>{% endif %}
+                ${{ p.precio_final|floatformat:"0g" }}
+            </div>
+            {% if p.stock > 0 %}
+            <button type="button" class="btn-add-cart" onclick="app.addToCart({{ p.id }})"><i class="fas fa-cart-plus"></i> Agregar</button>
+            {% else %}
+            <span class="stock-pill agotado">Agotado</span>
+            {% endif %}
+        </div>
+    </div>
+</div>

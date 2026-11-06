@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contacto - La Cabaña de Muscari{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock %}
+
+{% block content %}
+<div class="contact-page">
+    <!-- Hero Section -->
+    <div class="contact-hero">
+        <div class="container">
+            <h1>Contáctanos 💌</h1>
+            <p>Estamos aquí para ayudarte a crear momentos especiales</p>
+        </div>
+    </div>
+
+    <!-- Contact Info Cards -->
+    <div class="container">
+        <div class="contact-cards">
+            <div class="contact-card">
+                <div class="card-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <h3>Visítanos</h3>
+                <p>Hernando de Magallanes 401<br>Punta Arenas, Chile</p>
+                <a href="https://maps.app.goo.gl/G4NCapsJpfRGnGj79" target="_blank" class="card-link">
+                    Obtener rutas <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="contact-card">
+                <div class="card-icon"><i class="fas fa-phone"></i></div>
+                <h3>Llámanos</h3>
+                <p>+56 9 5421 9012<br>Lun - Sáb: 9:00 - 20:00</p>
+                <a href="tel:+56954219012" class="card-link">
+                    Llamar ahora <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="contact-card">
+                <div class="card-icon"><i class="fas fa-envelope"></i></div>
+                <h3>Escríbenos</h3>
+                <p>hola@cabanamuscari.com<br>Te respondemos en 24hrs</p>
+                <a href="mailto:hola@cabanamuscari.com" class="card-link">
+                    Enviar email <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <div class="contact-card">
+                <div class="card-icon"><i class="fab fa-whatsapp"></i></div>
+                <h3>WhatsApp</h3>
+                <p>+56 9 5421 9012<br>Respuesta inmediata</p>
+                <a href="https://wa.me/56954219012" target="_blank" class="card-link">
+                    Chatear <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map & Form Section -->
+    <div class="contact-main">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Contact Form -->
+                <div class="contact-form-wrapper">
+                    <h2>Envíanos un mensaje</h2>
+                    <p>Completa el formulario y nos pondremos en contacto contigo pronto</p>
+                    
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nombre">Nombre completo *</label>
+                                <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="apellido">Apellido *</label>
+                                <input type="text" id="apellido" name="apellido" required placeholder="Tu apellido">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Correo electrónico *</label>
+                                <input type="email" id="email" name="email" required placeholder="tu@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono" placeholder="+56 9 ...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="asunto">Asunto *</label>
+                            <select id="asunto" name="asunto" required>
+                                <option value="">Selecciona un asunto</option>
+                                <option value="consulta">Consulta general</option>
+                                <option value="pedido">Realizar pedido</option>
+                                <option value="cotizacion">Cotización especial</option>
+                                <option value="evento">Evento corporativo</option>
+                                <option value="matrimonio">Matrimonio</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mensaje">Mensaje *</label>
+                            <textarea id="mensaje" name="mensaje" rows="5" required placeholder="Cuéntanos en qué podemos ayudarte..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i> Enviar mensaje
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Map Section (Esri ArcGIS - Gratuito y sin bloqueos) -->
+                <div class="map-wrapper">
+                    <div id="map" class="map-container"></div>
+                    <div class="map-info">
+                        <h3>📍 Encuéntranos aquí</h3>
+                        <p>Estamos ubicados en Hernando de Magallanes 401, Punta Arenas, con estacionamiento disponible.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ============================================
+// CONFIGURACIÓN DEL MAPA (Esri ArcGIS - GRATUITO)
+// ============================================
+// Coordenadas: Hernando de Magallanes 401, Punta Arenas
+const LAT = -53.1569914;  
+const LNG = -70.9009086;
+
+// Esperar a que el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(inicializarMapa, 100);
+});
+
+function inicializarMapa() {
+    // Crear mapa
+    const map = L.map('map', {
+        center: [LAT, LNG],
+        zoom: 17,
+        zoomControl: true
+    });
+
+    // Usar Esri World Street Map (GRATUITO, sin API key)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri',
+        maxZoom: 18,
+        minZoom: 10
+    }).addTo(map);
+
+    // Marcador personalizado
+    const customIcon = L.divIcon({
+        html: '<div style="background: linear-gradient(135deg, #A8206E, #C96BB5); width: 40px; height: 40px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><span style="transform: rotate(45deg); font-size: 20px;">🌸</span></div>',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40],
+        className: 'custom-marker'
+    });
+
+    // Agregar marcador
+    L.marker([LAT, LNG], { icon: customIcon })
+        .addTo(map)
+        .bindPopup('<b style="color: #A8206E;">🌸 La Cabaña de Muscari</b><br>Hernando de Magallanes 401<br>¡Te esperamos aquí!')
+        .openPopup();
+
+    // Forzar recálculo del tamaño
+    setTimeout(() => map.invalidateSize(), 200);
+}
+</script>
+
+<style>
+/* Estilos del contacto */
+.contact-page { min-height: 100vh; }
+
+.contact-hero {
+    background: linear-gradient(135deg, var(--magenta-dark) 0%, var(--magenta) 100%);
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.contact-hero h1 { font-size: 48px; margin-bottom: 15px; font-weight: 800; }
+.contact-hero p { font-size: 20px; opacity: 0.95; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+.contact-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.contact-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.contact-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 40px rgba(168, 32, 110, 0.15);
+    border-color: var(--magenta);
+}
+
+.card-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--pink-light), #fce7f3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+    color: var(--magenta-dark);
+}
+
+.contact-card h3 { color: var(--dark); margin-bottom: 15px; font-size: 20px; }
+.contact-card p { color: #666; margin-bottom: 20px; line-height: 1.6; }
+
+.card-link {
+    color: var(--magenta-dark);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: gap 0.3s;
+}
+
+.card-link:hover { gap: 12px; }
+
+.contact-main { margin-bottom: 80px; }
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: start;
+}
+
+.contact-form-wrapper {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.contact-form-wrapper h2 { color: var(--magenta-dark); margin-bottom: 10px; font-size: 28px; }
+.contact-form-wrapper > p { color: #666; margin-bottom: 30px; }
+
+.contact-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.contact-form .form-group { margin-bottom: 25px; }
+
+.contact-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--dark);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s;
+    background: #fafafa;
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--magenta);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(201, 107, 181, 0.1);
+}
+
+.contact-form textarea { resize: vertical; min-height: 120px; }
+
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--magenta-dark), var(--magenta));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(168, 32, 110, 0.3);
+}
+
+.map-wrapper {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.map-container {
+    height: 500px;
+    width: 100%;
+    z-index: 1;
+}
+
+.map-info {
+    padding: 25px;
+    background: var(--light-bg);
+    border-top: 2px solid var(--pink-light);
+}
+
+.map-info h3 { color: var(--magenta-dark); margin-bottom: 8px; font-size: 18px; }
+.map-info p { color: #666; font-size: 14px; }
+
+@media (max-width: 968px) {
+    .contact-grid { grid-template-columns: 1fr; }
+    .map-container { height: 350px; }
+}
+
+@media (max-width: 768px) {
+    .contact-hero h1 { font-size: 36px; }
+    .contact-hero p { font-size: 16px; }
+    .contact-cards { grid-template-columns: 1fr; }
+    .contact-form .form-row { grid-template-columns: 1fr; }
+    .contact-form-wrapper { padding: 30px 20px; }
+}
+</style>
+{% endblock %}

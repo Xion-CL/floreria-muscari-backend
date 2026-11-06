@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- BANNER PRINCIPAL -->
+<section class="hero-banner">
+    <div class="hero-content">
+        <span class="hero-badge">DÍA DE LA MADRE</span>
+        <h1>Regala <span>emociones</span> que florecen</h1>
+        <div class="hero-discount">hasta 25% <small>dcto.</small></div>
+        <p>Arreglos florales únicos, peluches adorables y chocolates premium para sorprender a quien más quieres.</p>
+
+        <div class="hero-features">
+            <div class="hero-feature"><i class="fas fa-truck"></i> Envío mismo día</div>
+            <div class="hero-feature"><i class="fas fa-heart"></i> Flores frescas</div>
+            <div class="hero-feature"><i class="fas fa-gift"></i> Packaging premium</div>
+            <div class="hero-feature"><i class="fas fa-credit-card"></i> 6 cuotas sin interés</div>
+        </div>
+
+        <button class="btn-primary" id="verProductosBtn">Ver Productos</button>
+        <a class="btn-secondary" href="{% url 'combos' %}" id="armarComboBtn">Arma tu Combo</a>
+    </div>
+
+    <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?w=600&h=400&fit=crop" alt="Ramo de flores" onerror="this.style.display='none'">
+
+        <div class="hero-card hero-card-1">
+            <div class="price-label">Desde</div>
+            <div class="price">$28.990</div>
+            <div class="price-label">ramos desde</div>
+        </div>
+
+        <div class="hero-card hero-card-2">
+            <div class="discount-tag">25%</div>
+            <div>
+                <div class="discount-text">Descuento</div>
+                <div class="discount-text">Día de la Madre</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORÍAS -->
+<div class="section-title">
+    <h2>Nuestras <span>Categorías</span> 🌺</h2>
+</div>
+
+<div class="categories">
+    {% for c in menu_categorias %}
+    <a class="category-card" href="{% url 'catalogo:categoria-productos' c.slug %}">
+        <div class="category-icon">{{ c.icono|default:"🌸" }}</div>
+        <h3>{{ c.nombre }}</h3>
+        <p>{{ c.descripcion|truncatechars:48 }}</p>
+    </a>
+    {% endfor %}
+</div>
+
+<!-- BENEFICIOS -->
+<div class="benefits">
+    <div class="benefit-card">
+        <div class="benefit-icon"><i class="fas fa-shipping-fast"></i></div>
+        <h4>Envío Express</h4>
+        <p>Entrega el mismo día en toda la ciudad</p>
+    </div>
+    <div class="benefit-card">
+        <div class="benefit-icon"><i class="fas fa-leaf"></i></div>
+        <h4>Flores Frescas</h4>
+        <p>Garantizamos frescura por 7 días</p>
+    </div>
+    <div class="benefit-card">
+        <div class="benefit-icon"><i class="fas fa-credit-card"></i></div>
+        <h4>Hasta 6 Cuotas</h4>
+        <p>Sin interés con todas las tarjetas</p>
+    </div>
+    <div class="benefit-card">
+        <div class="benefit-icon"><i class="fas fa-headset"></i></div>
+        <h4>Atención Personalizada</h4>
+        <p>Te ayudamos a elegir el regalo perfecto</p>
+    </div>
+</div>
+
+<!-- PRODUCTOS DESTACADOS -->
+<div class="section-title">
+    <h2>Productos <span>Destacados</span> 💝</h2>
+    <a href="{% url 'catalogo:lista' %}">Ver todos →</a>
+</div>
+
+<div class="products-grid" id="productos-container">
+    <div class="text-center" style="grid-column: 1/-1; padding: 40px;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 40px; color: var(--magenta);"></i>
+        <p style="margin-top: 15px; color: #888;">Cargando productos...</p>
+    </div>
+</div>
+
+<!-- BANNER PROMOCIONAL -->
+<div class="promo-banner">
+    <div>
+        <h3>🎁 Armá tu Combo Personalizado</h3>
+        <p>Elegí flores + peluche + chocolate y ahorrá un 20% en tu compra</p>
+    </div>
+    <a class="btn-promo" href="{% url 'combos' %}" id="crearComboBtn" style="text-decoration:none;display:inline-block;">Crear mi Combo</a>
+</div>
+{% endblock %}

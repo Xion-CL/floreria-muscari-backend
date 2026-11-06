@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{% if categoria %}{{ categoria.nombre }}{% elif ocasion %}{{ ocasion.nombre }}{% else %}Todos los productos{% endif %} - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <header class="list-head">
+    <h1 class="page-title">
+      {% if categoria %}{{ categoria.icono }} {{ categoria.nombre }}
+      {% elif ocasion %}🎉 {{ ocasion.nombre }}
+      {% elif q %}Resultados para “{{ q }}”
+      {% else %}Todos los productos{% endif %}
+    </h1>
+    {% if categoria.descripcion %}<p class="muted">{{ categoria.descripcion }}</p>{% endif %}
+    {% if ocasion.descripcion %}<p class="muted">{{ ocasion.descripcion }}</p>{% endif %}
+  </header>
+
+  <form class="filter-bar" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Buscar producto...">
+    <select name="categoria" aria-label="Categoría">
+      <option value="">Todas las categorías</option>
+      {% for c in categorias %}<option value="{{ c.slug }}" {% if categoria and categoria.pk == c.pk %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+    <select name="ocasion" aria-label="Ocasión">
+      <option value="">Todas las ocasiones</option>
+      {% for o in ocasiones %}<option value="{{ o.slug }}" {% if ocasion and ocasion.pk == o.pk %}selected{% endif %}>{{ o.nombre }}</option>{% endfor %}
+    </select>
+    <select name="orden" aria-label="Ordenar por">
+      {% for val, etiqueta in ordenes %}<option value="{{ val }}" {% if orden == val %}selected{% endif %}>{{ etiqueta }}</option>{% endfor %}
+    </select>
+    <label class="check-inline"><input type="checkbox" name="oferta" value="1" {% if solo_oferta %}checked{% endif %}> Solo ofertas</label>
+    <button type="submit" class="btn-primary btn-sm">Filtrar</button>
+    {% if q or categoria or ocasion or solo_oferta %}<a class="btn-light btn-sm" href="{% url 'catalogo:lista' %}">Limpiar</a>{% endif %}
+  </form>
+
+  <p class="muted count">{{ total }} producto{{ total|pluralize }} encontrado{{ total|pluralize }}</p>
+
+  <div class="products-grid tight">
+    {% for p in productos %}
+      {% include 'partials/producto_card.html' %}
+    {% empty %}
+      <div class="empty-state"><i class="fas fa-box-open"></i><p>No encontramos productos con esos filtros.</p><a class="btn-primary" href="{% url 'catalogo:lista' %}">Ver todos</a></div>
+    {% endfor %}
+  </div>
+
+  {% include 'partials/paginacion.html' %}
+
+  {% if vistos %}
+  <h2 class="sub-title">Vistos recientemente</h2>
+  <div class="products-grid tight">{% for p in vistos %}{% include 'partials/producto_card.html' %}{% endfor %}</div>
+  {% endif %}
+</section>
+{% endblock %}

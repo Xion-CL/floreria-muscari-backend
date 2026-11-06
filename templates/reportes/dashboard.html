@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard de reportes - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <div class="panel-head">
+    <div><h1 class="page-title">Dashboard de reportes</h1><p class="muted">Generado el {{ generado|date:"d/m/Y H:i" }} · pedidos cancelados excluidos de ventas</p></div>
+    <div class="actions-row left"><a class="btn-light" href="{% url 'reportes:pedidos_csv' %}"><i class="fas fa-file-csv"></i> Exportar pedidos</a><a class="btn-light" href="{% url 'reportes:costos' %}"><i class="fas fa-calculator"></i> Costos del proyecto</a></div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><span>Ingresos</span><strong>${{ kpi_ingresos|floatformat:"0g" }}</strong></div>
+    <div class="kpi"><span>Pedidos</span><strong>{{ kpi_pedidos }}</strong></div>
+    <div class="kpi"><span>Ticket promedio</span><strong>${{ kpi_ticket|floatformat:"0g" }}</strong></div>
+    <div class="kpi"><span>Unidades vendidas</span><strong>{{ kpi_unidades }}</strong></div>
+    <div class="kpi"><span>Valor del inventario</span><strong>${{ inv_valor|floatformat:"0g" }}</strong></div>
+    <div class="kpi {% if n_agotados %}bad{% endif %}"><span>Productos agotados</span><strong>{{ n_agotados }}</strong></div>
+    <div class="kpi"><span>Valoración media</span><strong>{{ res_prom }} ★</strong><small>{{ res_n }} reseñas</small></div>
+    <div class="kpi"><span>Usuarios registrados</span><strong>{{ total_usuarios }}</strong></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card-box"><h2 class="sub-title nomargin">Ingresos por mes</h2><div class="chart-box"><canvas id="chMes" aria-label="Ingresos por mes"></canvas></div></div>
+    <div class="card-box"><h2 class="sub-title nomargin">Pedidos por estado</h2><div class="chart-box"><canvas id="chEstado" aria-label="Pedidos por estado"></canvas></div></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card-box"><h2 class="sub-title nomargin">Ventas por categoría</h2>
+      <table class="data-table compact"><thead><tr><th>Categoría</th><th class="num">Unidades</th><th class="num">Ingresos</th></tr></thead><tbody>
+      {% for f in por_categoria %}<tr><td>{{ f.cat }}</td><td class="num">{{ f.unidades }}</td><td class="num">${{ f.ingresos|floatformat:"0g" }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-cell">Sin ventas.</td></tr>{% endfor %}</tbody></table>
+      <div class="chart-box small"><canvas id="chCategoria" aria-label="Ingresos por categoría"></canvas></div></div>
+    <div class="card-box"><h2 class="sub-title nomargin">Top 5 productos más vendidos</h2>
+      <table class="data-table compact"><thead><tr><th>Producto</th><th class="num">Unid.</th><th class="num">Ingresos</th></tr></thead><tbody>
+      {% for f in top_productos %}<tr><td>{{ f.prod }}</td><td class="num">{{ f.unidades }}</td><td class="num">${{ f.ingresos|floatformat:"0g" }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-cell">Sin ventas.</td></tr>{% endfor %}</tbody></table>
+      <h2 class="sub-title">Medios de pago</h2>
+      <table class="data-table compact"><thead><tr><th>Método</th><th class="num">Pedidos</th><th class="num">Total</th></tr></thead><tbody>
+      {% for f in por_pago %}<tr><td>{{ f.etiqueta }}</td><td class="num">{{ f.n }}</td><td class="num">${{ f.total|floatformat:"0g" }}</td></tr>{% endfor %}</tbody></table></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card-box"><h2 class="sub-title nomargin">Inventario por categoría</h2>
+      <table class="data-table compact"><thead><tr><th>Categoría</th><th class="num">Productos</th><th class="num">Stock</th><th class="num">Precio prom.</th></tr></thead><tbody>
+      {% for c in por_cat_inv %}<tr><td>{{ c.nombre }}</td><td class="num">{{ c.n }}</td><td class="num">{{ c.stock|default:0 }}</td><td class="num">${{ c.precio_prom|default:0|floatformat:"0g" }}</td></tr>{% endfor %}</tbody></table>
+      <p class="muted small">Total: {{ inv.n }} productos · {{ inv.total_stock|default:0 }} unidades · precio promedio ${{ inv_precio_prom|floatformat:"0g" }}</p></div>
+    <div class="card-box"><h2 class="sub-title nomargin">⚠ Alertas de stock bajo</h2>
+      <table class="data-table compact"><thead><tr><th>Producto</th><th class="num">Stock</th><th class="num">Mín.</th></tr></thead><tbody>
+      {% for p in stock_bajo %}<tr><td><a href="{% url 'inventario:movimiento_crear' %}?producto={{ p.pk }}">{{ p.nombre }}</a></td><td class="num">{{ p.stock }}</td><td class="num">{{ p.stock_minimo }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-cell">Todo el stock está sobre el mínimo 🎉</td></tr>{% endfor %}</tbody></table></div>
+  </div>
+
+  <div class="two-col">
+    <div class="card-box"><h2 class="sub-title nomargin">Mejor valorados</h2>
+      <table class="data-table compact"><thead><tr><th>Producto</th><th class="num">Promedio</th><th class="num">Reseñas</th></tr></thead><tbody>
+      {% for p in mejor_valorados %}<tr><td>{{ p.nombre }}</td><td class="num">{{ p.prom|floatformat:2 }} ★</td><td class="num">{{ p.n_res }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-cell">Sin reseñas aún.</td></tr>{% endfor %}</tbody></table></div>
+    <div class="card-box"><h2 class="sub-title nomargin">Mejores clientes</h2>
+      <table class="data-table compact"><thead><tr><th>Cliente</th><th class="num">Pedidos</th><th class="num">Gasto</th></tr></thead><tbody>
+      {% for u in top_clientes %}<tr><td>{{ u.nombre_completo|default:u.username }}</td><td class="num">{{ u.n_pedidos }}</td><td class="num">${{ u.gasto|floatformat:"0g" }}</td></tr>{% empty %}<tr><td colspan="3" class="empty-cell">Sin compras aún.</td></tr>{% endfor %}</tbody></table></div>
+  </div>
+</section>
+{{ chart_data|json_script:"chart-data" }}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    if (typeof Chart === 'undefined') return;   // sin internet: las tablas siguen mostrando los datos
+    const d = JSON.parse(document.getElementById('chart-data').textContent);
+    const datos = (typeof d === 'string') ? JSON.parse(d) : d;
+    const colores = ['#A8206E', '#C96BB5', '#E8A820', '#2D1B3D', '#E8B8D9', '#6B8E5A', '#4A3B8C'];
+    const clp = (v) => '$' + Number(v).toLocaleString('es-CL');
+    new Chart(document.getElementById('chMes'), { type: 'bar',
+        data: { labels: datos.mes.labels, datasets: [{ label: 'Ingresos (CLP)', data: datos.mes.ingresos, backgroundColor: '#C96BB5', borderRadius: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => clp(c.raw) } } }, scales: { y: { ticks: { callback: clp } } } } });
+    new Chart(document.getElementById('chEstado'), { type: 'doughnut',
+        data: { labels: datos.estado.labels, datasets: [{ data: datos.estado.data, backgroundColor: colores }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+    new Chart(document.getElementById('chCategoria'), { type: 'bar',
+        data: { labels: datos.categoria.labels, datasets: [{ label: 'Ingresos (CLP)', data: datos.categoria.data, backgroundColor: '#A8206E', borderRadius: 6 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => clp(c.raw) } } }, scales: { x: { ticks: { callback: clp } } } } });
+})();
+</script>
+{% endblock %}

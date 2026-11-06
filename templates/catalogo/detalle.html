@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ producto.nombre }} - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <nav class="crumbs"><a href="{% url 'index' %}">Inicio</a> / <a href="{% url 'catalogo:categoria-productos' producto.categoria.slug %}">{{ producto.categoria.nombre }}</a> / {{ producto.nombre }}</nav>
+
+  <div class="detail-grid">
+    <div class="detail-img product-card" data-product-id="{{ producto.id }}" data-name="{{ producto.nombre }}" data-price="{{ producto.precio_final|stringformat:'d' }}" data-image="{{ producto.imagen_src }}">
+      {% if producto.imagen_src %}<img src="{{ producto.imagen_src }}" alt="{{ producto.nombre }}">{% else %}<div class="ph big">{{ producto.categoria.icono|default:"🌸" }}</div>{% endif %}
+    </div>
+    <div class="detail-info">
+      {% if producto.badge != 'NINGUNO' %}<span class="product-tag static">{{ producto.get_badge_display }}</span>{% endif %}
+      <h1 class="page-title">{{ producto.nombre }}</h1>
+      <div class="product-rating"><span class="stars">{% for i in "12345" %}<i class="{% if producto.promedio_resenas >= forloop.counter %}fas{% else %}far{% endif %} fa-star"></i>{% endfor %}</span>
+        <span class="rating-text">{{ producto.promedio_resenas }} · {{ producto.resenas_count }} reseña{{ producto.resenas_count|pluralize }}</span></div>
+      <div class="product-price big-price">
+        {% if producto.tiene_descuento %}<span class="old-price">${{ producto.precio_original|floatformat:"0g" }}</span><span class="desc-tag">-{{ producto.porcentaje_descuento }}%</span>{% endif %}
+        ${{ producto.precio_final|floatformat:"0g" }}
+      </div>
+      <p class="detail-desc">{{ producto.descripcion|linebreaksbr }}</p>
+      <ul class="detail-meta">
+        <li><i class="fas fa-tag"></i> Categoría: <a href="{% url 'catalogo:categoria-productos' producto.categoria.slug %}">{{ producto.categoria.nombre }}</a></li>
+        {% if producto.ocasiones.all %}<li><i class="fas fa-gift"></i> Ocasiones: {% for o in producto.ocasiones.all %}<a href="{% url 'catalogo:ocasion-productos' o.slug %}">{{ o.nombre }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endif %}
+        <li><i class="fas fa-box"></i> Stock:
+          {% if producto.stock == 0 %}<span class="stock-pill agotado">Agotado</span>{% elif producto.stock_bajo %}<span class="stock-pill bajo">Quedan {{ producto.stock }}</span>{% else %}<span class="stock-pill ok">Disponible</span>{% endif %}</li>
+        {% if producto.envio_gratis %}<li><i class="fas fa-truck"></i> Envío gratis</li>{% endif %}
+      </ul>
+      <div class="actions-row left">
+        {% if producto.stock > 0 %}<button type="button" class="btn-primary" onclick="app.addToCart({{ producto.id }})"><i class="fas fa-cart-plus"></i> Agregar al carrito</button>{% endif %}
+        <a class="btn-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> Consultar por WhatsApp</a>
+        {% if puede_gestionar %}<a class="btn-light" href="{% url 'catalogo:producto_editar' producto.pk %}"><i class="fas fa-pen"></i> Editar</a>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card-box">
+      <h2 class="sub-title nomargin">Reseñas</h2>
+      {% for r in resenas %}
+        <div class="resena"><strong>{{ r.nombre_cliente|default:"Cliente" }}</strong>
+          <span class="stars">{% for i in "12345" %}<i class="{% if r.valoracion >= forloop.counter %}fas{% else %}far{% endif %} fa-star"></i>{% endfor %}</span>
+          <small class="muted">{{ r.fecha_creacion|date:"d/m/Y" }}</small>
+          {% if r.comentario %}<p>{{ r.comentario }}</p>{% endif %}</div>
+      {% empty %}<p class="muted">Aún no hay reseñas. ¡Sé el primero en opinar!</p>{% endfor %}
+    </div>
+    <div class="card-box">
+      <h2 class="sub-title nomargin">Deja tu reseña</h2>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'catalogo:resena' producto.slug %}">
+        {% csrf_token %}
+        {% include 'partials/form_fields.html' with form=form_resena %}
+        <button class="btn-primary" type="submit">Publicar reseña</button>
+      </form>
+      {% else %}
+      <p class="muted">Inicia sesión para dejar una reseña.</p>
+      <a class="btn-primary" href="{% url 'login' %}?next={{ request.path }}">Iniciar sesión</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if relacionados %}<h2 class="sub-title">Más de {{ producto.categoria.nombre }}</h2>
+  <div class="products-grid tight">{% for p in relacionados %}{% include 'partials/producto_card.html' %}{% endfor %}</div>{% endif %}
+  {% if vistos %}<h2 class="sub-title">Vistos recientemente</h2>
+  <div class="products-grid tight">{% for p in vistos %}{% include 'partials/producto_card.html' %}{% endfor %}</div>{% endif %}
+</section>
+{% endblock %}

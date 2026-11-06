@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Pedidos (gestión) - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <div class="panel-head"><h1 class="page-title">Gestión de pedidos</h1><a class="btn-light" href="{% url 'reportes:pedidos_csv' %}"><i class="fas fa-file-csv"></i> Exportar CSV</a></div>
+  <form class="filter-bar" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Cliente, correo o teléfono...">
+    <select name="estado" aria-label="Estado"><option value="">Todos los estados</option>{% for val, label in estados %}<option value="{{ val }}" {% if estado_sel == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <button class="btn-primary btn-sm" type="submit">Filtrar</button><a class="btn-light btn-sm" href="{% url 'ventas:panel_pedidos' %}">Limpiar</a>
+  </form>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Comuna</th><th class="num">Total</th><th>Estado</th><th class="actions-col">Acciones</th></tr></thead>
+    <tbody>{% for p in pedidos %}
+      <tr><td>#{{ p.pk }}</td><td>{{ p.fecha_creacion|date:"d/m/Y H:i" }}</td><td>{{ p.nombre_cliente }}<br><small class="muted">{{ p.email }}</small></td><td>{{ p.comuna }}</td><td class="num">${{ p.total|floatformat:"0g" }}</td>
+        <td><span class="estado estado-{{ p.estado|lower }}">{{ p.get_estado_display }}</span></td>
+        <td class="actions-col"><a class="icon-btn" title="Ver / cambiar estado" href="{% url 'ventas:pedido_detalle' p.pk %}"><i class="fas fa-eye"></i></a></td></tr>
+    {% empty %}<tr><td colspan="7" class="empty-cell">No hay pedidos.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% include 'partials/paginacion.html' %}
+</section>
+{% endblock %}

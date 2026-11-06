@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Arma tu Combo - La Cabaña de Muscari{% endblock %}
+
+{% block content %}
+<div class="combos-page">
+    <div class="container">
+        <h1>Arma tu Combo Personalizado </h1>
+        <p class="subtitle">Elige flores + peluche + chocolate y ahorra un 20% en tu compra</p>
+        
+        <div class="combo-steps">
+            <div class="combo-step">
+                <div class="step-icon">💐</div>
+                <h3>Paso 1: Elige tus Flores</h3>
+                <p>Selecciona el ramo o arreglo floral que más te guste</p>
+                <button class="btn-primary" onclick="scrollToProducts('ramos')">Ver Flores</button>
+            </div>
+
+            <div class="combo-step">
+                <div class="step-icon">🧸</div>
+                <h3>Paso 2: Agrega un Peluche</h3>
+                <p>Elige entre nuestros adorables peluches</p>
+                <button class="btn-primary" onclick="scrollToProducts('peluches')">Ver Peluches</button>
+            </div>
+
+            <div class="combo-step">
+                <div class="step-icon">🍫</div>
+                <h3>Paso 3: Suma Chocolates</h3>
+                <p>Completa con una caja de chocolates premium</p>
+                <button class="btn-primary" onclick="scrollToProducts('chocolates')">Ver Chocolates</button>
+            </div>
+        </div>
+
+        <div class="combo-benefits">
+            <h3>💝 Beneficios del Combo</h3>
+            <div class="benefits-grid">
+                <div class="benefit">
+                    <div class="benefit-icon">💰</div>
+                    <p>20% de descuento</p>
+                </div>
+                <div class="benefit">
+                    <div class="benefit-icon">🚚</div>
+                    <p>Envío gratis</p>
+                </div>
+                <div class="benefit">
+                    <div class="benefit-icon">🎁</div>
+                    <p>Packaging premium</p>
+                </div>
+                <div class="benefit">
+                    <div class="benefit-icon">🎉</div>
+                    <p>Tarjeta personalizada</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const CATEGORIAS_COMBO = {
+    ramos: "{% url 'catalogo:categoria-productos' 'ramos' %}",
+    peluches: "{% url 'catalogo:categoria-productos' 'peluches' %}",
+    chocolates: "{% url 'catalogo:categoria-productos' 'chocolates' %}"
+};
+function scrollToProducts(category) {
+    window.location.href = CATEGORIAS_COMBO[category] || "{% url 'catalogo:lista' %}";
+}
+</script>
+
+<style>
+.combos-page {
+    padding: 60px 20px;
+    background: var(--light-bg);
+    min-height: 60vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.combos-page h1 {
+    text-align: center;
+    font-size: 36px;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--magenta-dark);
+    font-size: 18px;
+    margin-bottom: 50px;
+}
+
+.combo-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 60px;
+}
+
+.combo-step {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.combo-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(168, 32, 110, 0.15);
+    border-color: var(--magenta);
+}
+
+.step-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.combo-step h3 {
+    color: var(--dark);
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.combo-step p {
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.combo-benefits {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.combo-benefits h3 {
+    color: var(--magenta-dark);
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+}
+
+.benefit {
+    padding: 20px;
+}
+
+.benefit-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.benefit p {
+    color: var(--dark);
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .combo-steps {
+        grid-template-columns: 1fr;
+    }
+    
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+{% endblock %}

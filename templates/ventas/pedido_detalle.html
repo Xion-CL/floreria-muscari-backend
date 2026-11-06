@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Pedido #{{ pedido.pk }} - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide narrow-xl">
+  {% if es_nuevo %}<div class="card-box center ok-box"><div class="big-icon">🌸</div><h2>¡Gracias por tu compra!</h2><p>Recibimos tu pedido y te contactaremos para coordinar la entrega.</p></div>{% endif %}
+  <div class="panel-head"><h1 class="page-title">Pedido #{{ pedido.pk }}</h1><span class="estado estado-{{ pedido.estado|lower }}">{{ pedido.get_estado_display }}</span></div>
+  <div class="two-col">
+    <div class="card-box">
+      <h2 class="sub-title nomargin">Entrega</h2>
+      <p><strong>{{ pedido.nombre_cliente }}</strong><br>{{ pedido.email }} · {{ pedido.telefono }}</p>
+      <p>{{ pedido.direccion_entrega }}, {{ pedido.comuna }}, {{ pedido.ciudad }}</p>
+      <p>Fecha: {{ pedido.fecha_entrega_deseada|date:"d/m/Y" }}{% if pedido.hora_entrega_deseada %} · {{ pedido.hora_entrega_deseada|time:"H:i" }}{% endif %}</p>
+      {% if pedido.destinatario %}<p>Para: {{ pedido.destinatario }}</p>{% endif %}
+      {% if pedido.mensaje_tarjeta %}<p class="muted">“{{ pedido.mensaje_tarjeta }}”</p>{% endif %}
+      <p>Pago: {{ pedido.get_metodo_pago_display }} · {% if pedido.pago_realizado %}pagado{% else %}pendiente de pago{% endif %}</p>
+    </div>
+    <div class="card-box">
+      <h2 class="sub-title nomargin">Productos</h2>
+      {% for d in pedido.detalles.all %}<div class="sum-row"><span>{{ d.cantidad }} × {{ d.producto.nombre }}</span><span>${{ d.subtotal|floatformat:"0g" }}</span></div>{% endfor %}
+      <div class="sum-row"><span>Subtotal</span><strong>${{ pedido.subtotal|floatformat:"0g" }}</strong></div>
+      <div class="sum-row"><span>Envío</span><strong>{% if pedido.costo_envio %}${{ pedido.costo_envio|floatformat:"0g" }}{% else %}Gratis{% endif %}</strong></div>
+      <div class="sum-row total"><span>Total</span><strong>${{ pedido.total|floatformat:"0g" }}</strong></div>
+    </div>
+  </div>
+  {% if puede_gestionar %}
+  <form method="post" action="{% url 'ventas:pedido_estado' pedido.pk %}" class="filter-bar">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+    <label for="estadoSel">Cambiar estado:</label>
+    <select name="estado" id="estadoSel">{% for val, label in estados %}<option value="{{ val }}" {% if pedido.estado == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <button class="btn-primary btn-sm" type="submit">Actualizar</button>
+  </form>
+  {% endif %}
+  <a class="btn-light" href="{% url 'ventas:mis_pedidos' %}">&larr; Mis pedidos</a>
+</section>
+{% endblock %}
+{% block extra_js %}{% if es_nuevo %}<script>try { localStorage.removeItem('cabaña_muscari_cart'); if (window.cart) { window.cart.items = []; window.cart.updateBadge(); } } catch (e) {}</script>{% endif %}{% endblock %}

@@ -1,0 +1,90 @@
+<div class="site-header">
+<div class="top-bar">
+    <i class="fas fa-truck"></i> ¡Envío GRATIS en compras mayores a $50.000! Entrega el mismo día 🌸
+</div>
+
+<header class="header">
+    <a href="{% url 'index' %}" class="logo">
+        <img src="https://i.imgur.com/ePz4dkj.jpeg" alt="La Cabaña de Muscari">
+        <div class="logo-text">La Cabaña de <span>Muscari</span></div>
+    </a>
+
+    <form class="search-bar" method="get" action="{% url 'catalogo:lista' %}" role="search">
+        <input type="search" name="q" id="searchInput" value="{{ q|default:'' }}" placeholder="Busca ramos, peluches, chocolates..." aria-label="Buscar productos">
+        <button type="submit" aria-label="Buscar"><i class="fas fa-search"></i></button>
+    </form>
+
+    <div class="header-actions">
+        {% if user.is_authenticated %}
+        <div class="user-menu" data-dropdown>
+            <button type="button" class="dropdown-toggle user-toggle" aria-haspopup="true" aria-expanded="false">
+                <i class="far fa-user"></i>
+                <span class="user-name">Hola, {{ user.first_name|default:user.username }}</span>
+                <i class="fas fa-chevron-down caret"></i>
+            </button>
+            <div class="dropdown-menu dropdown-right">
+                <a href="{% url 'perfil' %}"><i class="far fa-id-card"></i> Mi perfil</a>
+                <a href="{% url 'ventas:mis_pedidos' %}"><i class="fas fa-box"></i> Mis pedidos</a>
+                <div class="menu-sep"></div>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <a href="{% url 'login' %}" class="login-link"><i class="far fa-user"></i> <span>Iniciar sesión</span></a>
+        {% endif %}
+        <a href="{% url 'carrito' %}" class="cart-btn" aria-label="Carrito">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+        </a>
+        <button type="button" class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Abrir menú" aria-controls="navBar" aria-expanded="false">
+            <span class="burger" aria-hidden="true"><span></span><span></span><span></span></span>
+        </button>
+    </div>
+</header>
+
+<nav class="nav-bar" id="navBar" aria-label="Navegación principal">
+    <a href="{% url 'index' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Inicio</a>
+    <a href="{% url 'catalogo:lista' %}" class="nav-link {% if request.resolver_match.url_name == 'lista' and not categoria and not ocasion %}active{% endif %}">Productos</a>
+
+    {% for c in menu_categorias %}
+    <a href="{% url 'catalogo:categoria-productos' c.slug %}" class="nav-link {% if categoria and categoria.pk == c.pk %}active{% endif %}">{{ c.nombre }}</a>
+    {% endfor %}
+
+    {% if menu_ocasiones %}
+    <div class="nav-dropdown" data-dropdown>
+        <button type="button" class="nav-link dropdown-toggle {% if ocasion %}active{% endif %}" aria-haspopup="true" aria-expanded="false">Ocasiones <i class="fas fa-chevron-down caret"></i></button>
+        <div class="dropdown-menu">
+            {% for o in menu_ocasiones %}
+            <a href="{% url 'catalogo:ocasion-productos' o.slug %}">{{ o.nombre }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'combos' %}" class="nav-link {% if request.path == '/combos/' %}active{% endif %}">Arma tu combo</a>
+    <a href="{% url 'contacto' %}" class="nav-link {% if request.path == '/contacto/' %}active{% endif %}">Contacto</a>
+
+    {% if puede_gestionar %}
+    <div class="nav-dropdown" data-dropdown>
+        <button type="button" class="nav-link dropdown-toggle {% if request.path|slice:':8' == '/reporte' %}active{% endif %}" aria-haspopup="true" aria-expanded="false"><i class="fas fa-cog"></i> Gestión <i class="fas fa-chevron-down caret"></i></button>
+        <div class="dropdown-menu dropdown-right">
+            <div class="menu-label">Catálogo</div>
+            <a href="{% url 'catalogo:panel_productos' %}">Productos</a>
+            <a href="{% url 'catalogo:panel_categorias' %}">Categorías</a>
+            <div class="menu-sep"></div>
+            <div class="menu-label">Operación</div>
+            <a href="{% url 'ventas:panel_pedidos' %}">Pedidos</a>
+            <a href="{% url 'inventario:inventario' %}">Inventario</a>
+            <a href="{% url 'inventario:movimientos' %}">Movimientos de stock</a>
+            <div class="menu-sep"></div>
+            <div class="menu-label">Análisis</div>
+            <a href="{% url 'reportes:dashboard' %}">Dashboard de reportes</a>
+            <a href="{% url 'reportes:costos' %}">Costos del proyecto</a>
+        </div>
+    </div>
+    {% endif %}
+</nav>
+</div>

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }} - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<div class="page-narrow wide">
+  <div class="card-box">
+    <h1 class="page-title">{{ titulo }}</h1>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% include 'partials/form_fields.html' %}
+      <div class="actions-row"><a class="btn-light" href="{% url 'catalogo:panel_productos' %}">Cancelar</a><button class="btn-primary" type="submit"><i class="fas fa-save"></i> Guardar</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}

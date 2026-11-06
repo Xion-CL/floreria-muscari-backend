@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Productos (gestión) - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <div class="panel-head">
+    <h1 class="page-title">Gestión de productos</h1>
+    <a class="btn-primary" href="{% url 'catalogo:producto_crear' %}"><i class="fas fa-plus"></i> Nuevo producto</a>
+  </div>
+
+  <form class="filter-bar" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre o descripción...">
+    <select name="categoria" aria-label="Categoría"><option value="">Todas las categorías</option>
+      {% for c in categorias %}<option value="{{ c.pk }}" {% if categoria_sel == c.pk|stringformat:'d' %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}</select>
+    <select name="estado" aria-label="Estado">
+      <option value="">Todos los estados</option>
+      <option value="bajo" {% if estado == 'bajo' %}selected{% endif %}>Stock bajo</option>
+      <option value="agotado" {% if estado == 'agotado' %}selected{% endif %}>Agotados</option>
+      <option value="inactivo" {% if estado == 'inactivo' %}selected{% endif %}>No disponibles</option>
+    </select>
+    <button class="btn-primary btn-sm" type="submit">Filtrar</button>
+    <a class="btn-light btn-sm" href="{% url 'catalogo:panel_productos' %}">Limpiar</a>
+  </form>
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Producto</th><th>Categoría</th><th class="num">Precio</th><th class="num">Stock</th><th>Estado</th><th class="actions-col">Acciones</th></tr></thead>
+      <tbody>
+      {% for p in productos %}
+        <tr>
+          <td><div class="cell-prod">
+              {% if p.imagen_src %}<img src="{{ p.imagen_src }}" alt="">{% else %}<span class="thumb-ph">{{ p.categoria.icono|default:"🌸" }}</span>{% endif %}
+              <a href="{% url 'catalogo:detalle' p.slug %}">{{ p.nombre }}</a></div></td>
+          <td>{{ p.categoria.nombre }}</td>
+          <td class="num">${{ p.precio_final|floatformat:"0g" }}{% if p.tiene_descuento %}<br><small class="muted"><s>${{ p.precio_original|floatformat:"0g" }}</s></small>{% endif %}</td>
+          <td class="num">{{ p.stock }}
+            {% if p.stock == 0 %}<br><span class="stock-pill agotado">Agotado</span>{% elif p.stock_bajo %}<br><span class="stock-pill bajo">Bajo</span>{% endif %}</td>
+          <td>{% if p.disponible %}<span class="stock-pill ok">Visible</span>{% else %}<span class="stock-pill agotado">Oculto</span>{% endif %}{% if p.destacado %} <span class="stock-pill bajo">★</span>{% endif %}</td>
+          <td class="actions-col">
+            <a class="icon-btn" title="Editar" href="{% url 'catalogo:producto_editar' p.pk %}"><i class="fas fa-pen"></i></a>
+            <a class="icon-btn danger" title="Eliminar" href="{% url 'catalogo:producto_eliminar' p.pk %}"><i class="fas fa-trash"></i></a>
+          </td>
+        </tr>
+      {% empty %}<tr><td colspan="6" class="empty-cell">No hay productos con esos filtros.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/paginacion.html' %}
+</section>
+{% endblock %}

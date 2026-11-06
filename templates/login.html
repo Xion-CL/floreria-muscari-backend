@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-box">
+    <h1>Iniciar sesión</h1>
+    <p class="auth-sub">Ingresa con tu usuario o correo electrónico</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include 'partials/form_fields.html' %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit" class="btn-primary btn-full">Ingresar</button>
+    </form>
+    <p class="auth-foot">¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Categorías (gestión) - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <div class="panel-head">
+    <h1 class="page-title">Gestión de categorías</h1>
+    <a class="btn-primary" href="{% url 'catalogo:categoria_crear' %}"><i class="fas fa-plus"></i> Nueva categoría</a>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Orden</th><th>Categoría</th><th>Descripción</th><th class="num">Productos</th><th>Estado</th><th class="actions-col">Acciones</th></tr></thead>
+      <tbody>
+      {% for c in categorias %}
+        <tr><td>{{ c.orden }}</td><td>{{ c.icono }} <strong>{{ c.nombre }}</strong></td><td>{{ c.descripcion|truncatechars:70 }}</td><td class="num">{{ c.n_productos }}</td>
+          <td>{% if c.activo %}<span class="stock-pill ok">Activa</span>{% else %}<span class="stock-pill agotado">Inactiva</span>{% endif %}</td>
+          <td class="actions-col"><a class="icon-btn" title="Editar" href="{% url 'catalogo:categoria_editar' c.pk %}"><i class="fas fa-pen"></i></a>
+            <a class="icon-btn danger" title="Eliminar" href="{% url 'catalogo:categoria_eliminar' c.pk %}"><i class="fas fa-trash"></i></a></td></tr>
+      {% empty %}<tr><td colspan="6" class="empty-cell">Aún no hay categorías.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

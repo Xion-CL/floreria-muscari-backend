@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Crear cuenta - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-box wide">
+    <h1>Crear cuenta</h1>
+    <p class="auth-sub">Regístrate para comprar y seguir tus pedidos</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include 'partials/form_fields.html' %}
+      <button type="submit" class="btn-primary btn-full">Registrarme</button>
+    </form>
+    <p class="auth-foot">¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+  </div>
+</div>
+{% endblock %}

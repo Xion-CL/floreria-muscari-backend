@@ -1,0 +1,68 @@
+===============================================================================
+ COSTOS, USO DE IA Y GUION DE PRESENTACION  (Evaluación 2 - Backend)
+===============================================================================
+Los valores son SUPUESTOS referenciales. Reemplázalos por las horas y tarifas
+reales de tu grupo en apps/reportes/costos.py: la página /reportes/costos/ se
+recalcula sola. (CLP; 1 USD = $950 supuesto)
+
+1. ESTIMACION DE COSTO DE DESARROLLO (equipo de 3, ~2 meses)
+-------------------------------------------------------------------------------
+ Rol                         Tarifa/h   Horas con IA   Costo
+ Analista / Documentación     $ 8.000        68        $  544.000
+ Desarrollo Backend           $10.000       132        $1.320.000
+ Desarrollo Frontend          $ 9.000        56        $  504.000
+ QA / Pruebas                 $ 8.000        24        $  192.000
+ TOTAL horas-hombre                         280        $2.560.000
+
+2. INFRAESTRUCTURA
+-------------------------------------------------------------------------------
+ Durante la evaluación: $0 (Render Free, Supabase Free, GitHub gratis).
+ Proyección a producción 12 meses: Render Starter US$7/mes + Supabase Pro
+ US$25/mes + dominio .cl (~$10.000/año)  =  $374.800 CLP/año (~$31.200/mes).
+
+3. USO DE IA (herramientas)
+-------------------------------------------------------------------------------
+ Asistente de IA para código: US$20/mes x 2 meses = $38.000 CLP.
+
+4. COMPARACION CON / SIN IA
+-------------------------------------------------------------------------------
+ Horas:  280 con IA  vs  377 sin IA   ->  97 horas menos (25,7 %)
+ Costo:  $2.598.000 con IA  vs  $3.486.000 sin IA  ->  ahorro $888.000 (25,5 %)
+
+5. ANALISIS CRITICO DE LA IA (para exponer)
+-------------------------------------------------------------------------------
+ + Aceleró código repetitivo: modelos, formularios, CRUD, plantillas, pruebas.
+ + Ayudó a depurar (migraciones, conexión a Supabase, estáticos en producción).
+ + Sugirió validaciones y configuración segura (variables de entorno, DEBUG=False).
+ - No reemplaza el levantamiento de requisitos con las clientas ni el diseño.
+ - Puede asumir cosas incorrectas: todo se revisó y se probó (24 pruebas).
+ - Ejemplo real: la IA detectó que el carrito sumaba precio original + oferta
+   al leer el texto de la tarjeta; se corrigió usando data-attributes.
+
+6. GUION DE DEMOSTRACION EN VIVO (8-10 min)
+-------------------------------------------------------------------------------
+ 0. (2 min antes) Abrir la URL de Render para "despertar" el servicio.
+ 1. Inicio: categorías, productos destacados desde la API (/api/productos-destacados/).
+ 2. Menú: PC (dropdown "Ocasiones") y móvil (F12 > modo móvil > hamburguesa).
+ 3. Footer: clic en "Peluches" y en "Cumpleaños" -> productos filtrados (URL limpia).
+ 4. Catálogo: búsqueda, filtros, orden, paginación; detalle con reseñas y WhatsApp.
+ 5. Registro de un usuario nuevo (validación de RUT/correo) -> sesión iniciada;
+    mostrar cambio del navbar ("Hola, <nombre>") y "vistos recientemente".
+ 6. CRUD (Gestión > Productos): crear, editar, eliminar; mostrar validación
+    (oferta mayor que precio) y protección al borrar categoría con productos.
+ 7. Compra: agregar al carrito -> Finalizar compra -> pedido creado, stock baja.
+ 8. Gestión > Pedidos: cambiar estado; cancelar devuelve stock (Inventario > Movimientos).
+ 9. Reportes (/reportes/): KPIs, ingresos por mes, ventas por categoría, top
+    productos, stock bajo; exportar CSV. Mencionar Count/Sum/Avg/TruncMonth.
+10. Costos (/reportes/costos/): horas-hombre, infraestructura, impacto de la IA.
+11. Cierre: arquitectura (Django + Supabase + Render + GitHub), seguridad
+    (variables de entorno, DEBUG=False) y mejoras futuras (pagos Webpay, mapa).
+
+7. CHECKLIST RUBRICA
+-------------------------------------------------------------------------------
+ [x] Backend y CRUD con ORM, validaciones y separación en apps (20 pts)
+ [x] Autenticación, sesiones y control de acceso (20 pts)
+ [x] Reportes con agregaciones ORM y visualización (20 pts)
+ [x] Despliegue online, DEBUG=False, estáticos, variables de entorno (10 pts)
+ [x] Costos e impacto de IA documentados (10 pts)
+ [x] Presentación con guion (20 pts)

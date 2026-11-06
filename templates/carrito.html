@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Carrito - La Cabaña de Muscari{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <div class="section-title" style="padding: 0; margin-bottom: 30px;">
+        <h2>Tu <span>Carrito</span> 🛒</h2>
+    </div>
+
+    <div id="cart-items-container">
+        <!-- Los items del carrito se renderizan aquí con JS -->
+        <div class="empty-cart">
+            <i class="fas fa-shopping-basket"></i>
+            <h3>Tu carrito está vacío</h3>
+            <p>¡Agrega algunos productos hermosos para empezar!</p>
+            <a href="{% url 'index' %}" class="btn-primary" style="margin-top: 20px;">Ver Productos</a>
+        </div>
+    </div>
+
+    <div id="cart-summary" class="cart-summary" style="display: none;">
+        <div class="cart-total">
+            Total: <span id="cart-total-amount">$0</span>
+        </div>
+        <button class="btn-clear" onclick="app.clearCart()">Vaciar Carrito</button>
+        <button class="btn-checkout" onclick="app.checkout()">Finalizar Compra</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Lógica específica de la página del carrito
+document.addEventListener('DOMContentLoaded', () => {
+    renderCartPage();
+});
+
+function renderCartPage() {
+    const container = document.getElementById('cart-items-container');
+    const summary = document.getElementById('cart-summary');
+    const totalAmount = document.getElementById('cart-total-amount');
+    
+    if (!window.cart || window.cart.items.length === 0) {
+        container.innerHTML = `
+            <div class="empty-cart">
+                <i class="fas fa-shopping-basket"></i>
+                <h3>Tu carrito está vacío</h3>
+                <p>¡Agrega algunos productos hermosos para empezar!</p>
+                <a href="{% url 'index' %}" class="btn-primary" style="margin-top: 20px; display: inline-block;">Ver Productos</a>
+            </div>
+        `;
+        summary.style.display = 'none';
+        return;
+    }
+
+    let html = '';
+    let total = 0;
+
+    window.cart.items.forEach(item => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        
+        html += `
+            <div class="cart-item">
+                ${item.image ? `<img src="${item.image}" alt="">` : `<div class="cart-ph">🌸</div>`}
+                <div class="cart-item-info">
+                    <h4>${item.name}</h4>
+                    <p style="color: var(--magenta-dark); font-weight: 600;">${Utils.formatMoney(item.price)}</p>
+                </div>
+                <div class="cart-item-controls">
+                    <button class="qty-btn" onclick="app.updateCartItem(${item.id}, ${item.quantity - 1})">-</button>
+                    <span style="font-weight: 600; min-width: 20px; text-align: center;">${item.quantity}</span>
+                    <button class="qty-btn" onclick="app.updateCartItem(${item.id}, ${item.quantity + 1})">+</button>
+                    <button class="qty-btn" style="border-color: #dc3545; color: #dc3545; margin-left: 15px;" onclick="app.removeCartItem(${item.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+    totalAmount.textContent = Utils.formatMoney(total);
+    summary.style.display = 'block';
+}
+
+// Extender la clase App para el carrito
+app.clearCart = function() {
+    if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+        window.cart.clear();
+        renderCartPage();
+    }
+};
+
+app.removeCartItem = function(productId) {
+    window.cart.remove(productId);
+    renderCartPage();
+};
+
+app.updateCartItem = function(productId, newQuantity) {
+    window.cart.updateQuantity(productId, newQuantity);
+    renderCartPage();
+};
+
+app.checkout = function() {
+    // El pedido se registra en el servidor (requiere iniciar sesión)
+    window.location.href = "{% url 'ventas:checkout' %}";
+};
+</script>
+{% endblock %}

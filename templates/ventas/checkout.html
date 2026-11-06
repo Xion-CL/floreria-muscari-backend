@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Finalizar compra - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <h1 class="page-title">Finalizar compra</h1>
+  <div class="two-col checkout-grid">
+    <div class="card-box">
+      <h2 class="sub-title nomargin">Datos de entrega</h2>
+      <form method="post" id="checkoutForm" novalidate>
+        {% csrf_token %}
+        {% include 'partials/form_fields.html' %}
+        <button class="btn-primary btn-full" type="submit" id="btnPagar">Confirmar pedido</button>
+      </form>
+    </div>
+    <div class="card-box">
+      <h2 class="sub-title nomargin">Resumen</h2>
+      <div id="resumenItems" class="muted">Cargando carrito...</div>
+      <div class="sum-row"><span>Subtotal</span><strong id="resSubtotal">$0</strong></div>
+      <div class="sum-row"><span>Envío</span><strong id="resEnvio">$0</strong></div>
+      <div class="sum-row total"><span>Total estimado</span><strong id="resTotal">$0</strong></div>
+      <p class="muted small">Los precios finales y el stock se verifican en el servidor al confirmar. Envío gratis desde $50.000.</p>
+      <a class="btn-light btn-sm" href="{% url 'carrito' %}">&larr; Volver al carrito</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const items = (window.cart && window.cart.items) ? window.cart.items : [];
+    const campo = document.getElementById('id_items');
+    const lista = document.getElementById('resumenItems');
+    if (campo) campo.value = JSON.stringify(items.map(i => ({ id: i.id, quantity: i.quantity })));
+    if (!items.length) {
+        lista.innerHTML = 'Tu carrito está vacío. <a href="{% url 'catalogo:lista' %}">Ver productos</a>';
+        document.getElementById('btnPagar').disabled = true;
+        return;
+    }
+    lista.innerHTML = items.map(i =>
+        `<div class="sum-row"><span>${i.quantity} × ${String(i.name).replace(/</g, '&lt;')}</span><span>${Utils.formatMoney(i.price * i.quantity)}</span></div>`).join('');
+    const subtotal = window.cart.getTotal();
+    const envio = subtotal >= 50000 ? 0 : 3500;
+    document.getElementById('resSubtotal').textContent = Utils.formatMoney(subtotal);
+    document.getElementById('resEnvio').textContent = envio ? Utils.formatMoney(envio) : 'Gratis';
+    document.getElementById('resTotal').textContent = Utils.formatMoney(subtotal + envio);
+});
+</script>
+{% endblock %}

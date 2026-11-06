@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Página no encontrada - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<div class="page-narrow"><div class="card-box center">
+  <div class="big-icon">🥀</div>
+  <h1 class="page-title">Página no encontrada</h1>
+  <p>La página que buscas no existe o fue movida.</p>
+  <a class="btn-primary" href="{% url 'index' %}">Volver al inicio</a>
+</div></div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Inventario - La Cabaña de Muscari{% endblock %}
+{% block content %}
+<section class="page-wide">
+  <div class="panel-head"><h1 class="page-title">Inventario</h1>
+    <div class="actions-row left"><a class="btn-light" href="{% url 'inventario:movimientos' %}">Historial</a><a class="btn-primary" href="{% url 'inventario:movimiento_crear' %}"><i class="fas fa-plus"></i> Registrar movimiento</a></div></div>
+  <div class="kpi-row">
+    <a class="kpi warn" href="?estado=bajo"><span>Stock bajo</span><strong>{{ n_bajos }}</strong></a>
+    <a class="kpi bad" href="?estado=agotado"><span>Agotados</span><strong>{{ n_agotados }}</strong></a>
+    <a class="kpi" href="{% url 'inventario:inventario' %}"><span>Ver todo</span><strong><i class="fas fa-list"></i></strong></a>
+  </div>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Producto</th><th>Categoría</th><th class="num">Stock</th><th class="num">Mínimo</th><th>Estado</th><th class="actions-col">Acciones</th></tr></thead>
+    <tbody>{% for p in productos %}
+      <tr><td>{{ p.nombre }}</td><td>{{ p.categoria.nombre }}</td><td class="num"><strong>{{ p.stock }}</strong></td><td class="num">{{ p.stock_minimo }}</td>
+        <td>{% if p.stock == 0 %}<span class="stock-pill agotado">Agotado</span>{% elif p.stock_bajo %}<span class="stock-pill bajo">Stock bajo</span>{% else %}<span class="stock-pill ok">OK</span>{% endif %}</td>
+        <td class="actions-col"><a class="btn-light btn-sm" href="{% url 'inventario:movimiento_crear' %}?producto={{ p.pk }}">Ajustar</a></td></tr>
+    {% empty %}<tr><td colspan="6" class="empty-cell">Sin productos para mostrar.</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% include 'partials/paginacion.html' %}
+</section>
+{% endblock %}

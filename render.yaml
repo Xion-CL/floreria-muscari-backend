@@ -1,0 +1,29 @@
+# Blueprint de Render: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: floreria-muscari
+    runtime: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+    healthCheckPath: /salud/
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL        # URL del Session Pooler de Supabase (se pega en el panel de Render)
+        sync: false
+      - key: ADMIN_PASSWORD      # clave del superusuario "admin_completo" (se pega en el panel de Render)
+        sync: false
+      - key: SEED_DEMO
+        value: "true"
+      - key: PANEL_SOLO_STAFF
+        value: "false"
+      - key: WHATSAPP_NUMBER
+        value: "56954219012"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://TU-USUARIO.github.io"

@@ -1,0 +1,36 @@
+# Entornos virtuales y secretos (NUNCA subir)
+venv/
+.venv/
+env/
+ENV/
+.env
+.env.*
+!.env.example
+*.pem
+credenciales*.txt
+Supabase*.txt
+
+# Python
+__pycache__/
+*.py[cod]
+.Python
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django
+db.sqlite3
+*.sqlite3
+db.sqlite3-journal
+/staticfiles/
+*.log
+local_settings.py
+
+# Editor / sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Nota: la carpeta media/productos/ SÍ se sube (son las fotos del catálogo).
